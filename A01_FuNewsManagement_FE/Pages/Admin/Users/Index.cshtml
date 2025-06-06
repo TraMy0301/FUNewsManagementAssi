@@ -1,0 +1,242 @@
+﻿@page
+@model A01_FuNewsManagement_FE.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    /* Main container styling */
+    .users-container {
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+    }
+
+    /* Page title styling */
+    .page-title {
+        color: #1E3C72;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100px;
+            background: linear-gradient(to right, #1E3C72, #2A5298);
+            border-radius: 2px;
+        }
+
+    /* Create new button styling */
+    .create-btn {
+        display: inline-block;
+        background: linear-gradient(to right, #1E3C72, #2A5298);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .create-btn:hover {
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    /* Table container with horizontal scroll if needed */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Table styling */
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .users-table thead {
+            background: linear-gradient(to right, #1E3C72, #2A5298);
+            color: white;
+        }
+
+        .users-table th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .users-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
+            position: relative;
+        }
+
+        /* Handle long content in cells */
+        .users-table td {
+            max-width: 200px; /* Limit cell width */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+            /* Specific width for password column */
+            .users-table th:nth-child(3),
+            .users-table td:nth-child(3) {
+                max-width: 150px;
+            }
+
+            /* Email column width */
+            .users-table th:nth-child(2),
+            .users-table td:nth-child(2) {
+                max-width: 180px;
+            }
+
+            /* Enhanced tooltip for password on hover */
+            .users-table td:nth-child(3) {
+                cursor: pointer;
+            }
+
+                .users-table td:nth-child(3):hover::after {
+                    content: attr(data-password);
+                    position: absolute;
+                    left: 0;
+                    top: 100%;
+                    z-index: 10;
+                    background: linear-gradient(to right, #1E3C72, #2A5298);
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    width: auto;
+                    min-width: 300px;
+                    max-width: 500px;
+                    word-wrap: break-word;
+                    white-space: normal;
+                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+                    font-family: monospace;
+                    font-size: 0.9em;
+                    line-height: 1.4;
+                    animation: fadeIn 0.3s;
+                }
+
+    
+    .users-table tbody tr:hover {
+        background-color: rgba(42, 82, 152, 0.05);
+    }
+
+    .users-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Action links styling */
+    .action-links {
+        display: flex;
+        gap: 8px;
+    }
+
+        .action-links a {
+            color: #1E3C72;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+            .action-links a:hover {
+                color: #2A5298;
+                text-decoration: underline;
+            }
+
+    /* Status indicator */
+    .status-active {
+        color: #28a745;
+        font-weight: 500;
+    }
+
+    .status-inactive {
+        color: #dc3545;
+        font-weight: 500;
+    }
+</style>
+
+<div class="users-container">
+    <h1 class="page-title">User Management</h1>
+
+    <p>
+        <a asp-page="Create" class="create-btn">Create New</a>
+    </p>
+    <div class="table-responsive">
+        <table class="table users-table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Users[0].FullName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Users[0].Email)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Users[0].Role)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Users[0].IsActive)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Users[0].CreatedAt)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Users[0].LastLoginAt)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FullName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Email)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Role)
+                        </td>
+                        <td>
+                            <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary") p-2">
+                                <i class="@(item.IsActive ? "fas fa-check-circle" : "fas fa-times-circle")"></i>
+                                @(item.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreatedAt)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.LastLoginAt)
+                        </td>
+                        <td class="action-links">
+                            <a asp-page="./Edit" asp-route-id="@item.UserId">Edit</a> |
+                            <a asp-page="./Details" asp-route-id="@item.UserId">Details</a> |
+                            <a asp-page="./Delete" asp-route-id="@item.UserId">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,148 @@
+﻿@page
+@model A01_FuNewsManagement_FE.Pages.Staff.Categories.CreateModel
+@{
+    ViewData["Title"] = "Create";
+    Layout = null;
+}
+
+<style>
+    body {
+        background: linear-gradient(to right, #1E3C72, #2A5298);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 0;
+    }
+
+    .create-user-form {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        width: 100%;
+        max-width: 1200px;
+    }
+
+        .create-user-form h1,
+        .create-user-form h4 {
+            color: #1E3C72;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control {
+        border: 1px solid #2A5298;
+        border-radius: 5px;
+        padding: 10px;
+        width: 100%;
+        transition: border-color 0.3s ease;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1E3C72;
+            box-shadow: 0 0 5px rgba(30, 60, 114, 0.5);
+        }
+
+    .btn-primary {
+        background: linear-gradient(to right, #1E3C72, #2A5298);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: transform 0.3s ease;
+        width: 100%;
+    }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 0.9em;
+    }
+
+    hr {
+        border-top: 2px solid rgba(30, 60, 114, 0.2);
+        margin: 20px 0;
+    }
+
+    .back-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+        .back-link a {
+            color: #1E3C72;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+            .back-link a:hover {
+                color: #2A5298;
+                text-decoration: underline;
+            }
+</style>
+
+<div class="create-user-container">
+    <div class="create-user-form">
+        <h1>Create</h1>
+        <h4>User</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group">
+                        <label asp-for="Category.CategoryName" class="control-label"></label>
+                        <input asp-for="Category.CategoryName" class="form-control" />
+                        <span asp-validation-for="Category.CategoryName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Category.Description" class="control-label"></label>
+                        <input asp-for="Category.Description" class="form-control" />
+                        <span asp-validation-for="Category.Description" class="text-danger"></span>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label asp-for="Category.ParentCategoryId" class="control-label"></label>
+                        <select asp-for="Category.ParentCategoryId" asp-items="Model.ParentCategories" class="form-control">
+                            <option value="">-- Choose Parent Catergory (option) --</option>
+                        </select>
+                        <span asp-validation-for="Category.ParentCategoryId" class="text-danger"></span>
+                    </div>
+
+                    <!--  IsActive toggle -->
+                    <div class="form-group">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="Category.IsActive" />
+                            @Html.DisplayNameFor(model => model.Category.IsActive)
+                        </label>
+                    </div>
+
+
+                    <div class="form-group">
+                        <input type="submit" value="Create" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="back-link">
+            <a asp-page="Index">Back to List</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

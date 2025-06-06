@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "A01_FuNewsManagament_API\\A01_FuNewsManagament_API.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "A01_FuNewsManagement_FE\\A01_FuNewsManagement_FE.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

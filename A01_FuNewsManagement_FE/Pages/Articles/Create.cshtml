@@ -1,0 +1,169 @@
+﻿@page
+@model A01_FuNewsManagement_FE.Pages.Articles.CreateModel
+@{
+    ViewData["Title"] = "Create Article";
+}
+
+<style>
+    /* Reuse existing styles from Index.cshtml */
+    .articles-container {
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+    }
+
+    .page-title {
+        color: #1E3C72;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100px;
+            background: linear-gradient(to right, #1E3C72, #2A5298);
+            border-radius: 2px;
+        }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: #1E3C72;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1E3C72;
+            box-shadow: 0 0 5px rgba(30, 60, 114, 0.2);
+        }
+
+    .submit-btn {
+        background: linear-gradient(to right, #1E3C72, #2A5298);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .submit-btn:hover {
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+            transform: translateY(-2px);
+        }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: #1E3C72;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: underline;
+        transition: color 0.2s ease;
+    }
+
+        .back-btn:hover {
+            color: #2A5298;
+        }
+
+    .validation-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="articles-container">
+    <h1 class="page-title">Create New Article</h1>
+
+    <!-- Display Success/Error Messages -->
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @Model.SuccessMessage
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <form method="post">
+        <div class="form-group">
+            <label class="form-label" asp-for="Article.Title">Title</label>
+            <input asp-for="Article.Title" class="form-control" />
+            <span asp-validation-for="Article.Title" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" asp-for="Article.Headline">Headline</label>
+            <input asp-for="Article.Headline" class="form-control" />
+            <span asp-validation-for="Article.Headline" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" asp-for="Article.Content">Content</label>
+            <textarea asp-for="Article.Content" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Article.Content" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" asp-for="Article.Source">Source</label>
+            <input asp-for="Article.Source" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" asp-for="Article.CategoryId">Category</label>
+            <select asp-for="Article.CategoryId" class="form-control">
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.CategoryId">@category.CategoryName</option>
+                }
+            </select>
+            <span asp-validation-for="Article.CategoryId" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" asp-for="Article.Status">Status</label>
+            <select asp-for="Article.Status" class="form-control">
+                <option value="Draft">Draft</option>
+                <option value="Published">Published</option>
+            </select>
+            <span asp-validation-for="Article.Status" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="submit-btn">Create</button>
+            <a asp-page="./Index" class="back-btn">Back to List</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

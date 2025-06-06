@@ -1,0 +1,345 @@
+﻿@page
+@model A01_FuNewsManagement_FE.Pages.Articles.IndexModel
+@{
+    ViewData["Title"] = "Article Management";
+}
+
+<style>
+    /* Main container styling */
+    .articles-container {
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+    }
+
+    /* Page title styling */
+    .page-title {
+        color: #1E3C72;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100px;
+            background: linear-gradient(to right, #1E3C72, #2A5298);
+            border-radius: 2px;
+        }
+
+    /* Create new button styling */
+    .create-btn {
+        display: inline-block;
+        background: linear-gradient(to right, #1E3C72, #2A5298);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .create-btn:hover {
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    /* Table container with horizontal scroll if needed */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Table styling */
+    .articles-table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .articles-table thead {
+            background: linear-gradient(to right, #1E3C72, #2A5298);
+            color: white;
+        }
+
+        .articles-table th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .articles-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
+            position: relative;
+        }
+
+        /* Handle long content in cells */
+        .articles-table td {
+            max-width: 200px; /* Limit cell width */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .articles-table tbody tr:hover {
+            background-color: rgba(42, 82, 152, 0.05);
+        }
+
+        .articles-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    /* Action links styling */
+    .action-links {
+        display: flex;
+        gap: 8px;
+    }
+
+        .action-links a {
+            color: #1E3C72;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+            .action-links a:hover {
+                color: #2A5298;
+                text-decoration: underline;
+            }
+
+    /* Status indicator */
+    .status-draft {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .status-published {
+        color: #28a745;
+        font-weight: 500;
+    }
+
+    /* Search bar styling */
+    .search-container {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+        min-width: 250px;
+        transition: border-color 0.3s ease;
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1E3C72;
+            box-shadow: 0 0 5px rgba(30, 60, 114, 0.2);
+        }
+
+    .search-dropdown {
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+        background-color: white;
+        color: #1E3C72;
+        transition: border-color 0.3s ease;
+    }
+
+        .search-dropdown:focus {
+            outline: none;
+            border-color: #1E3C72;
+            box-shadow: 0 0 5px rgba(30, 60, 114, 0.2);
+        }
+
+    .search-btn {
+        background: linear-gradient(to right, #1E3C72, #2A5298);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .search-btn:hover {
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+            transform: translateY(-2px);
+        }
+
+    .clear-btn {
+        background: none;
+        border: none;
+        color: #1E3C72;
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .clear-btn:hover {
+            color: #2A5298;
+            text-decoration: underline;
+        }
+</style>
+
+<div class="articles-container">
+    <h1 class="page-title">Article Management</h1>
+
+    <!-- Display Success/Error Messages -->
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @Model.SuccessMessage
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <!-- Search Bar -->
+    <form class="search-container" method="get">
+        <input type="text" class="search-input" placeholder="Tìm kiếm bài viết..." name="searchString" value="@Model.SearchString" />
+        <select class="search-dropdown" name="categoryFilter">
+            <option value="">Tất cả danh mục</option>
+            @foreach (var category in Model.Categories)
+            {
+                @if (Model.CategoryFilter == category.CategoryId.ToString())
+                {
+                    <option value="@category.CategoryId" selected>@category.CategoryName</option>
+                }
+                else
+                {
+                    <option value="@category.CategoryId">@category.CategoryName</option>
+                }
+            }
+        </select>
+        <select class="search-dropdown" name="statusFilter">
+            <option value="">Tất cả trạng thái</option>
+            @if (Model.StatusFilter == "Draft")
+            {
+                <option value="Draft" selected>Draft</option>
+            }
+            else
+            {
+                <option value="Draft">Draft</option>
+            }
+            @if (Model.StatusFilter == "Published")
+            {
+                <option value="Published" selected>Published</option>
+            }
+            else
+            {
+                <option value="Published">Published</option>
+            }
+        </select>
+        <button type="submit" class="search-btn">Tìm kiếm</button>
+        <button type="button" class="clear-btn" onclick="window.location.href='/Articles'">Xóa bộ lọc</button>
+    </form>
+
+    <p>
+        <a asp-page="Create" class="create-btn">Create New</a>
+    </p>
+    <div class="table-responsive">
+        <table class="table articles-table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Articles[0].Title)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Articles[0].Headline)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Articles[0].CategoryId)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Articles[0].Status)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Articles[0].CreatedAt)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Articles[0].ModifiedAt)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Articles != null && Model.Articles.Any())
+                {
+                    @foreach (var item in Model.Articles)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Headline)
+                            </td>
+                            <td>
+                                @{
+                                    var category = Model.Categories.FirstOrDefault(c => c.CategoryId == item.CategoryId);
+                                    @if (category != null)
+                                    {
+                                        @category.CategoryName
+                                    }
+                                    else
+                                    {
+                                        <span>N/A</span>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <span class="status-@(item.Status.ToLower())">
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </span>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CreatedAt)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ModifiedAt)
+                            </td>
+                            <td class="action-links">
+                                <a asp-page="./Edit" asp-route-id="@item.ArticleId">Edit</a> |
+                                <a asp-page="./Details" asp-route-id="@item.ArticleId">Details</a> |
+                                <a asp-page="./Delete" asp-route-id="@item.ArticleId">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">No articles found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
