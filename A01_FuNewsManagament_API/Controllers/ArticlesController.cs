@@ -1,10 +1,12 @@
 ﻿using BusinessObjects.Entities;
+using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
+using Microsoft.AspNetCore.SignalR;
 using Services;
 using Services.DTOs;
 using System.Threading.Tasks;
@@ -17,14 +19,16 @@ namespace A01_FuNewsManagament_API.Controllers
     public class ArticlesController : ControllerBase
     {
         private readonly IArticleService _service;
+        private readonly IHubContext<NotificationHub> _context;
 
-        public ArticlesController(IArticleService service)
+        public ArticlesController(IArticleService service, IHubContext<NotificationHub> context)
         {
             _service = service;
+            _context = context;
         }
 
         [EnableQuery]
-        //[HttpGet]
+        [HttpGet]
         public IQueryable<Article> Get()
         {
             return _service.GetArticles();
@@ -54,8 +58,7 @@ namespace A01_FuNewsManagament_API.Controllers
                 return BadRequest(new ApiResponse(400, "Dữ liệu không hợp lệ"));
 
             var response = await _service.AddArticle(article);
-            //return CreatedAtAction(nameof(GetArticleById), new { id = response.ArticleId },
-            //    new ApiResponse<ArticleResponseDto>(201, "Tạo người dùng thành công", response));
+            await _context.Clients.All.SendAsync("ReceiveUpdate", article);
             return StatusCode(201, new ApiResponse<ArticleResponseDto>(201, "Tạo bài báo thành công", response));
 
         }
@@ -79,7 +82,6 @@ namespace A01_FuNewsManagament_API.Controllers
         }
 
         [EnableQuery]
-        // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> DeleteArticle(string id)
         {
@@ -92,9 +94,9 @@ namespace A01_FuNewsManagament_API.Controllers
                 await _service.DeleteArticle(id);
                 return Ok(new ApiResponse(200, "Xóa bài báo thành công"));
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(new ApiResponse(404, ex.Message));
+                return StatusCode(500, new ApiResponse(500, $"Lỗi: {ex.Message}"));
             }
         }
     }

@@ -74,7 +74,7 @@ namespace Services
                 UserId = created.UserId,
                 FullName = created.FullName,
                 Email = created.Email,
-                CreatedAt = created.CreatedAt,
+                CreatedAt = DateTime.Now,
                 IsActive = created.IsActive,
                 Role = created.Role,
                 LastLoginAt = created.LastLoginAt

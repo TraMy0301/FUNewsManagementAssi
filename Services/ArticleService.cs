@@ -27,7 +27,7 @@ namespace Services
                 Headline = dto.Headline,
                 Source = dto.Source,
                 CategoryId = dto.CategoryId,
-                CreatedAt = dto.CreatedAt,
+                CreatedAt = DateTime.Now,
                 ModifiedAt = dto.ModifiedAt,
             };
 
@@ -40,7 +40,7 @@ namespace Services
                 Headline = created.Headline,
                 Source = created.Source,
                 Status = created.Status,
-              //  CategoryName = created.Category.CategoryName, 
+                //CategoryName = created.Category.CategoryName, 
                 CreatedAt = created.CreatedAt,
                 ModifiedAt = created.ModifiedAt,
             };
@@ -105,6 +105,7 @@ namespace Services
             existing.Source = article.Source;
             existing.CategoryId = article.CategoryId;
             existing.Status = article.Status;
+            existing.ModifiedAt = DateTime.Now;
 
             await _repository.UpdateArticleAsync(existing);
         }

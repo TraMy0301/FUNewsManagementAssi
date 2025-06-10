@@ -67,12 +67,13 @@ namespace A01_FuNewsManagement_FE.Pages.Accounts
                     }
                     else if (role == "Staff")
                     {
-                        return RedirectToPage("/Staff/Categories/Index");
+                        return RedirectToPage("/Articles/Index");
                     }
                     else
                     {
-                        ErrorMessage = "Tài khoản không có quyền truy cập phù hợp.";
-                        return Page();
+                        /*ErrorMessage = "Tài khoản không có quyền truy cập phù hợp.";
+                        return Page();*/
+                        return RedirectToPage("/Articles/IndexCus");
                     }
                 }
 

@@ -69,7 +69,7 @@ namespace A01_FuNewsManagement_FE.Pages.Staff.Categories
                     new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true,
-                        Converters = { new JsonStringEnumConverter() } // Để handle AccountRole enum
+                        Converters = { new JsonStringEnumConverter() } 
                     }
                 );
 

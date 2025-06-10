@@ -17,7 +17,7 @@ namespace Repositories
 
         public IQueryable<Category> GetAll()
         {
-            return _context.Categories.AsQueryable(); // Không async vì IQueryable chưa thực thi
+            return _context.Categories.AsQueryable().Include(n=> n.ParentCategory); // Không async vì IQueryable chưa thực thi
         }
 
         public async Task<Category?> GetByIdAsync(int id)

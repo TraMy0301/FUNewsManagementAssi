@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Services.DTOs;
 using System.Text.Json;
 using BusinessObjects.Entities;
+using Microsoft.AspNetCore.SignalR;
+using Services;
 
 namespace A01_FuNewsManagement_FE.Pages.Articles
 {
@@ -113,6 +115,7 @@ namespace A01_FuNewsManagement_FE.Pages.Articles
             }
 
             await LoadCategoriesAsync();
+
             return Page();
         }
 

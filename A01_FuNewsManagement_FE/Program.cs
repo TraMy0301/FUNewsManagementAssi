@@ -43,6 +43,11 @@
 
             app.MapRazorPages();
 
+            app.MapGet("/", context =>
+            {
+                context.Response.Redirect("/Articles/IndexCus");
+                return Task.CompletedTask;
+            });
             app.Run();
         }
     }

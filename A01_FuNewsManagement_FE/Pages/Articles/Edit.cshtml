@@ -1,0 +1,57 @@
+﻿@page
+@model A01_FuNewsManagement_FE.Pages.Articles.EditModel
+@{
+    ViewData["Title"] = "Chỉnh sửa Bài báo";
+}
+
+<h2>Chỉnh sửa Bài báo</h2>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="ArticleId" />
+
+
+    <div class="form-group">
+        <label asp-for="Article.Title"></label>
+        <input asp-for="Article.Title" class="form-control" />
+        <span asp-validation-for="Article.Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Article.Headline"></label>
+        <input asp-for="Article.Headline" class="form-control" />
+        <span asp-validation-for="Article.Headline" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Article.Content"></label>
+        <textarea asp-for="Article.Content" class="form-control" rows="5"></textarea>
+        <span asp-validation-for="Article.Content" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Article.Source"></label>
+        <input asp-for="Article.Source" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Article.CategoryId"></label>
+        <select asp-for="Article.CategoryId" asp-items="Model.CategoryOptions" class="form-control">
+            <option value="">-- Chọn danh mục --</option>
+        </select>
+        <span asp-validation-for="Article.CategoryId" class="text-danger"></span>
+    </div>
+
+
+
+    <div class="form-group">
+        <label asp-for="Article.Status"></label>
+        <select asp-for="Article.Status" class="form-control">
+            <option value="Draft">Nháp</option>
+            <option value="Published">Đã xuất bản</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-page="./Index" class="btn btn-secondary">Quay lại</a>
+</form>

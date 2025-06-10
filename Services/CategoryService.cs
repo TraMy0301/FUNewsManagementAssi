@@ -60,7 +60,7 @@ namespace Services
                 Description = category.Description,
                 IsActive = category.IsActive,
                 ParentCategoryId = category.ParentCategoryId,
-                CreatedAt = category.CreatedAt
+                CreatedAt = DateTime.Now
             };
 
             var created = await _repository.AddAsync(request);
@@ -86,7 +86,7 @@ namespace Services
             existing.CategoryName = dto.CategoryName;
             existing.Description = dto.Description;
             existing.IsActive = dto.IsActive;
-            existing.ModifiedAt = dto.ModifiedAt;
+            existing.ModifiedAt = DateTime.Now;
             existing.ParentCategoryId = dto.ParentCategoryId;
 
             await _repository.UpdateAsync(existing);

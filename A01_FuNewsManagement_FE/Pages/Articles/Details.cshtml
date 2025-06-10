@@ -1,0 +1,28 @@
+﻿@page "{id:int}"
+@model A01_FuNewsManagement_FE.Pages.Articles.DetailsModel
+@{
+    ViewData["Title"] = "Chi tiết danh mục";
+}
+
+<h2>Chi tiết danh mục</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (Model.Category != null)
+{
+    <div class="card mt-3">
+        <div class="card-body">
+            <h4 class="card-title">@Model.Category.CategoryName</h4>
+            <p><strong>ID:</strong> @Model.Category.CategoryId</p>
+            <p><strong>Trạng thái:</strong> @Model.Category.Status</p>
+            <p><strong>Ngày tạo:</strong> @Model.Category.CreatedAt.ToString("dd/MM/yyyy")</p>
+        </div>
+    </div>
+}
+else
+{
+    <p>Đang tải dữ liệu...</p>
+}
+

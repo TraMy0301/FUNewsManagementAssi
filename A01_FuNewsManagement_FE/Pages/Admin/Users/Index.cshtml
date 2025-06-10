@@ -198,9 +198,9 @@
                     <th>
                         @Html.DisplayNameFor(model => model.Users[0].CreatedAt)
                     </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Users[0].LastLoginAt)
-                    </th>
+                    @* <th> *@
+                    @*     @Html.DisplayNameFor(model => model.Users[0].LastLoginAt) *@
+                    @* </th> *@
                     <th></th>
                 </tr>
             </thead>
@@ -226,9 +226,9 @@
                         <td>
                             @Html.DisplayFor(modelItem => item.CreatedAt)
                         </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.LastLoginAt)
-                        </td>
+                        @* <td> *@
+                        @*     @Html.DisplayFor(modelItem => item.LastLoginAt) *@
+                        @* </td> *@
                         <td class="action-links">
                             <a asp-page="./Edit" asp-route-id="@item.UserId">Edit</a> |
                             <a asp-page="./Details" asp-route-id="@item.UserId">Details</a> |

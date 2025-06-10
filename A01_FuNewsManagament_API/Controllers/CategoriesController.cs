@@ -1,4 +1,4 @@
-﻿using BusinessObjects.Entities;
+﻿    using BusinessObjects.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -31,6 +31,7 @@ namespace A01_FuNewsManagament_API.Controllers
 
 
         [EnableQuery]
+        [HttpGet]
         public IQueryable<Category> Get()
         {
             return _service.GetAllEntities();    

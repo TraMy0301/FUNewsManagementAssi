@@ -1,5 +1,7 @@
 ﻿using BusinessObjects.Data;
 using BusinessObjects.Entities;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +10,7 @@ using Microsoft.OData.ModelBuilder;
 using Repositories;
 using Services;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 
 namespace A01_FuNewsManagament_API
@@ -24,7 +27,7 @@ namespace A01_FuNewsManagament_API
 
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            //builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
             // add odata
@@ -64,26 +67,63 @@ namespace A01_FuNewsManagament_API
 
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
             var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-            builder.Services.AddAuthentication("Bearer")
-                .AddJwtBearer("Bearer", options =>
+            //builder.Services.AddAuthentication("Bearer")
+            //    .AddJwtBearer("Bearer", options =>
+            //    {
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuer = true,
+            //            ValidIssuer = jwtSettings.Issuer,
+
+            //            ValidateAudience = true,
+            //            ValidAudience = jwtSettings.Audience,
+
+            //            ValidateLifetime = true,
+            //            ValidateIssuerSigningKey = true,
+
+            //            IssuerSigningKey = new SymmetricSecurityKey(
+            //                Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+            //        };
+            //    });
+
+            //Auth
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // default là Cookies
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme; // dùng Google khi cần Challenge
+            }).AddCookie()
+
+
+
+            .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+            {
+                options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
+            })
+
+            //builder.Services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtSettings.Issuer,
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
 
-                        ValidateAudience = true,
-                        ValidAudience = jwtSettings.Audience,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
 
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
 
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
-                    };
-                });
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+                };
+            });
 
 
             builder.Services.AddAuthorization(options =>
@@ -92,6 +132,9 @@ namespace A01_FuNewsManagament_API
                 options.AddPolicy("StaffOnly", policy => policy.RequireRole("Staff"));
                 options.AddPolicy("LecturerOnly", policy => policy.RequireRole("Lecturer"));
             });
+
+            builder.Services.AddRazorPages();
+            builder.Services.AddSignalR();
 
             //map fe vs be
             builder.Services.AddCors(options =>
@@ -105,6 +148,7 @@ namespace A01_FuNewsManagament_API
                 });
             });
 
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -114,16 +158,23 @@ namespace A01_FuNewsManagament_API
                 app.UseSwaggerUI();
             }
 
-
             app.UseCors("AllowFrontend");
+
             app.UseHttpsRedirection();
 
+            app.UseRouting(); // **Phải có**
+
+            app.UseAuthentication(); // nếu có JWT
             app.UseAuthorization();
 
+            app.UseDeveloperExceptionPage();
 
             app.MapControllers();
+            app.MapRazorPages();
+            app.MapHub<NotificationHub>("/syncHub");
 
             app.Run();
+
         }
     }
 }

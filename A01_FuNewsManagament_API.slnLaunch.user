@@ -4,11 +4,13 @@
     "Projects": [
       {
         "Path": "A01_FuNewsManagament_API\\A01_FuNewsManagament_API.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "https"
       },
       {
         "Path": "A01_FuNewsManagement_FE\\A01_FuNewsManagement_FE.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "https"
       }
     ]
   }
