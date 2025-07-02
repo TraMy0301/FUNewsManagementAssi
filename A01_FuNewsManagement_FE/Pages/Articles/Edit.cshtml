@@ -1,57 +1,150 @@
-﻿@page
+﻿@page "{id}"
 @model A01_FuNewsManagement_FE.Pages.Articles.EditModel
 @{
-    ViewData["Title"] = "Chỉnh sửa Bài báo";
+    ViewData["Title"] = "Edit Article";
 }
 
-<h2>Chỉnh sửa Bài báo</h2>
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .form-check {
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+        min-width: 150px;
+    }
+
+    .form-check-input {
+        margin-right: 0.5rem;
+    }
+
+    .validation-error {
+        color: red;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+</style>
+
+<h2>Edit Article</h2>
 
 <form method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" asp-for="ArticleId" />
 
-
     <div class="form-group">
-        <label asp-for="Article.Title"></label>
+        <label class="form-label" asp-for="Article.Title">Title</label>
         <input asp-for="Article.Title" class="form-control" />
-        <span asp-validation-for="Article.Title" class="text-danger"></span>
+        <span asp-validation-for="Article.Title" class="validation-error"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Article.Headline"></label>
+        <label class="form-label" asp-for="Article.Headline">Headline</label>
         <input asp-for="Article.Headline" class="form-control" />
-        <span asp-validation-for="Article.Headline" class="text-danger"></span>
+        <span asp-validation-for="Article.Headline" class="validation-error"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Article.Content"></label>
+        <label class="form-label" asp-for="Article.Content">Content</label>
         <textarea asp-for="Article.Content" class="form-control" rows="5"></textarea>
-        <span asp-validation-for="Article.Content" class="text-danger"></span>
+        <span asp-validation-for="Article.Content" class="validation-error"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Article.Source"></label>
+        <label class="form-label" asp-for="Article.Source">Source</label>
         <input asp-for="Article.Source" class="form-control" />
     </div>
 
     <div class="form-group">
-        <label asp-for="Article.CategoryId"></label>
-        <select asp-for="Article.CategoryId" asp-items="Model.CategoryOptions" class="form-control">
-            <option value="">-- Chọn danh mục --</option>
+        <label class="form-label" asp-for="Article.CategoryId">Category</label>
+        <select asp-for="Article.CategoryId" class="form-control">
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.CategoryId">@category.CategoryName</option>
+            }
         </select>
-        <span asp-validation-for="Article.CategoryId" class="text-danger"></span>
+        <span asp-validation-for="Article.CategoryId" class="validation-error"></span>
     </div>
+
+    <div class="form-group">
+        <label class="form-label">Tags</label>
+        <div class="d-flex flex-wrap">
+            @foreach (var tag in Model.Tags)
+            {
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="Article.TagIds"
+                           value="@tag.TagId"
+                           id="tag_@tag.TagId"
+                           @(Model.Article.TagIds.Contains(tag.TagId) ? "checked" : "") />
+                    <label class="form-check-label" for="tag_@tag.TagId">@tag.TagName</label>
+                </div>
+            }
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label class="form-label" asp-for="Article.Status">Status</label>
+        <select asp-for="Article.Status" class="form-control">
+            <option value="Draft">Draft</option>
+            <option value="Published">Published</option>
+        </select>
+        <span asp-validation-for="Article.Status" class="validation-error"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Ảnh đại diện mới (tuỳ chọn)</label>
+        <input type="file" asp-for="UploadImage" class="form-control" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Article.ImageURL))
+    {
+        <div class="mt-2">
+            <label>Ảnh hiện tại:</label><br />
+            <img src="@($"{Model.Article.ImageURL}?v={DateTime.Now.Ticks}")" alt="Ảnh hiện tại" style="max-height: 200px;" />
+        </div>
+    }
 
 
 
     <div class="form-group">
-        <label asp-for="Article.Status"></label>
-        <select asp-for="Article.Status" class="form-control">
-            <option value="Draft">Nháp</option>
-            <option value="Published">Đã xuất bản</option>
-        </select>
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a asp-page="./Index" class="btn btn-secondary">Back</a>
     </div>
-
-    <button type="submit" class="btn btn-primary">Lưu</button>
-    <a asp-page="./Index" class="btn btn-secondary">Quay lại</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

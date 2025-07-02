@@ -37,7 +37,7 @@ namespace Services
                 Email = email,
                 FullName = fullName,
                 IsActive = true,
-                Role = AccountRole.Staff, 
+                Role = (int)AccountRole.Staff, 
                 Password = "GoogleLogin" 
             };
 

@@ -1,4 +1,4 @@
-﻿using BusinessObjects.Data;
+﻿using BusinessObjects;
 using BusinessObjects.Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -7,11 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using Microsoft.OpenApi.Models;
 using Repositories;
 using Services;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace A01_FuNewsManagament_API
 {
@@ -21,7 +23,7 @@ namespace A01_FuNewsManagament_API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddDbContext<FuNewsManagementDbContext>(options =>
+            builder.Services.AddDbContext<FuNewsDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
@@ -42,18 +44,63 @@ namespace A01_FuNewsManagament_API
             }
 
             builder.Services.AddControllers()
-                .AddOData(opt =>
-                    opt.AddRouteComponents("odata", GetEdmModel())
-                        .Select()
-                        .Filter()
-                        .Expand()
-                        .OrderBy()
-                        .Count()
-                        .SetMaxTop(100)
-                );
+            .AddOData(opt =>
+                opt.AddRouteComponents("odata", GetEdmModel())
+                    .Select()
+                    .Filter()
+                    .Expand()
+                    .OrderBy()
+                    .Count()
+                    .SetMaxTop(100))
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
+
 
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            //builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Your API",
+                    Version = "v1"
+                });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header using the Bearer scheme.  
+                        Enter 'Bearer' [space] and then your token in the text input below.  
+                        Example: 'Bearer abcdef12345'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "Bearer",
+                            Name = "Authorization",
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                });
+            });
+
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -71,24 +118,7 @@ namespace A01_FuNewsManagament_API
 
 
             var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-            //builder.Services.AddAuthentication("Bearer")
-            //    .AddJwtBearer("Bearer", options =>
-            //    {
-            //        options.TokenValidationParameters = new TokenValidationParameters
-            //        {
-            //            ValidateIssuer = true,
-            //            ValidIssuer = jwtSettings.Issuer,
-
-            //            ValidateAudience = true,
-            //            ValidAudience = jwtSettings.Audience,
-
-            //            ValidateLifetime = true,
-            //            ValidateIssuerSigningKey = true,
-
-            //            IssuerSigningKey = new SymmetricSecurityKey(
-            //                Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
-            //        };
-            //    });
+            
 
             //Auth
             builder.Services.AddAuthentication(options =>

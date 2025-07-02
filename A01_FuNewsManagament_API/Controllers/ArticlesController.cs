@@ -34,7 +34,14 @@ namespace A01_FuNewsManagament_API.Controllers
             return _service.GetArticles();
         }
 
-       
+        [HttpGet("GetAllArticlesOdata")]
+        public ActionResult<IEnumerable<ArticleResponseDto>> GetAll()
+        {
+            var articles = _service.GetAllArticles().ToList(); // materialize IQueryable
+            return Ok(articles);
+        }
+
+
         [EnableQuery]
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<ArticleResponseDto>>> GetArticleById(string id)
@@ -51,7 +58,7 @@ namespace A01_FuNewsManagament_API.Controllers
         }
 
         [EnableQuery]
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<ActionResult<ApiResponse<ArticleResponseDto>>> AddArticle([FromBody] ArticleRequestDto article)
         {
             if (!ModelState.IsValid)

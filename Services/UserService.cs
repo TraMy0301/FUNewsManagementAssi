@@ -30,7 +30,7 @@ namespace Services
                 Email = u.Email,
                 CreatedAt = u.CreatedAt,
                 IsActive = u.IsActive,
-                Role = u.Role,
+                Role = (AccountRole)u.Role,
                 LastLoginAt = u.LastLoginAt
             }).ToList());
 
@@ -50,7 +50,7 @@ namespace Services
                 Email = user.Email,
                 CreatedAt = user.CreatedAt,
                 IsActive = user.IsActive,
-                Role = user.Role,
+                Role = (AccountRole)user.Role,
                 LastLoginAt = user.LastLoginAt,
             };
         }
@@ -61,7 +61,7 @@ namespace Services
             {
                 FullName = dto.FullName,
                 Email = dto.Email,
-                Role = dto.Role,
+                Role = (int)dto.Role,
                 IsActive = dto.IsActive,
             };
 
@@ -76,7 +76,7 @@ namespace Services
                 Email = created.Email,
                 CreatedAt = DateTime.Now,
                 IsActive = created.IsActive,
-                Role = created.Role,
+                Role = (AccountRole)created.Role,
                 LastLoginAt = created.LastLoginAt
             };
         }
@@ -92,7 +92,7 @@ namespace Services
 
             existing.FullName = dto.FullName;
             existing.Email = dto.Email;
-            existing.Role = dto.Role;
+            existing.Role = (int)dto.Role;
             existing.IsActive = dto.IsActive;
 
             await _repository.UpdateUserAsync(existing);

@@ -1,4 +1,5 @@
-﻿using BusinessObjects.Entities;
+﻿using BusinessObjects;
+using BusinessObjects.Entities;
 using Microsoft.EntityFrameworkCore;
 using Repositories;
 using Services.DTOs;
@@ -13,8 +14,10 @@ namespace Services
     public class ArticleService : IArticleService
     {
         private readonly IArticleRepository _repository;
-        public ArticleService(IArticleRepository repository) {
+        private readonly FuNewsDbContext _context;
+        public ArticleService(IArticleRepository repository, FuNewsDbContext fuNewsDbContext) {
             _repository = repository;
+            _context = fuNewsDbContext;
         }
 
         public async Task<ArticleResponseDto> AddArticle(ArticleRequestDto dto)
@@ -29,9 +32,22 @@ namespace Services
                 CategoryId = dto.CategoryId,
                 CreatedAt = DateTime.Now,
                 ModifiedAt = dto.ModifiedAt,
+                ImageURL = dto.ImageURL,
+                Status = "Pending",
+                Tags = new List<Tag>()
             };
 
+            // Gán Tags nếu có
+            if (dto.TagIds != null && dto.TagIds.Any())
+            {
+                var tags = await _context.Tags
+                .Where(t => dto.TagIds.Contains(t.TagId))
+                .ToListAsync();
+                article.Tags = tags;
+            }
+
             var created = await _repository.AddArticleAsync(article);
+
             return new ArticleResponseDto
             {
                 ArticleId = created.ArticleId,
@@ -40,11 +56,17 @@ namespace Services
                 Headline = created.Headline,
                 Source = created.Source,
                 Status = created.Status,
-                //CategoryName = created.Category.CategoryName, 
                 CreatedAt = created.CreatedAt,
                 ModifiedAt = created.ModifiedAt,
+                ImageURL = created.ImageURL,
+                Tags = created.Tags.Select(t => new TagResponseDto
+                {
+                    TagId = t.TagId,
+                    TagName = t.TagName
+                }).ToList()
             };
         }
+
 
         public async Task DeleteArticle(string id)
         {
@@ -53,7 +75,8 @@ namespace Services
 
         public IQueryable<ArticleResponseDto> GetAllArticles()
         {
-            var articles = _repository.GetAll(); // vẫn là IQueryable
+            var articles = _repository.GetAll(); // đã Include Tags
+
             return articles.Select(a => new ArticleResponseDto
             {
                 ArticleId = a.ArticleId,
@@ -61,12 +84,19 @@ namespace Services
                 Headline = a.Headline,
                 Content = a.Content,
                 Source = a.Source,
-              //  CategoryName = a.Category.CategoryName,
                 Status = a.Status,
                 CreatedAt = a.CreatedAt,
-                ModifiedAt = a.ModifiedAt
+                ModifiedAt = a.ModifiedAt,
+                ImageURL = a.ImageURL,
+                Tags = a.Tags.Select(t => new TagResponseDto
+                {
+                    TagId = t.TagId,
+                    TagName = t.TagName
+                }).ToList()
             });
         }
+
+
 
         public IQueryable<Article> GetArticles()
         {
@@ -75,9 +105,12 @@ namespace Services
 
         public async Task<ArticleResponseDto> GetArticleById(string id)
         {
-            var article = await _repository.GetByIdAsync(id);
-            if (article == null)
-                throw new Exception("Article not found");
+            var article = await _context.Articles
+            .Include(a => a.Tags) 
+            .FirstOrDefaultAsync(a => a.ArticleId == id);
+
+            if (article == null) throw new KeyNotFoundException("Không tìm thấy bài viết");
+
             return new ArticleResponseDto
             {
                 ArticleId = article.ArticleId,
@@ -85,32 +118,67 @@ namespace Services
                 Headline = article.Headline,
                 Content = article.Content,
                 Source = article.Source,
-              //  CategoryName = article.Category.CategoryName,
                 Status = article.Status,
+                CategoryId = article.CategoryId,
                 CreatedAt = article.CreatedAt,
-                ModifiedAt = article.ModifiedAt
+                ModifiedAt = article.ModifiedAt,
+                ImageURL = article.ImageURL,
+
+                Tags = article.Tags.Select(t => new TagResponseDto
+                {
+                    TagId = t.TagId,
+                    TagName = t.TagName
+                }).ToList()
             };
         }
 
 
-        public async Task UpdateArticle(string id, ArticleRequestDto article)
+        public async Task UpdateArticle(string id, ArticleRequestDto dto)
         {
-            var existing = await _repository.GetByIdAsync(id);
-            if (existing == null)
-                throw new Exception("Id is not found");
+            var existingArticle = await _context.Articles
+                .Include(a => a.Tags) 
+                .FirstOrDefaultAsync(a => a.ArticleId == id);
 
-            existing.Title = article.Title;
-            existing.Headline = article.Headline;
-            existing.Content = article.Content;
-            existing.Source = article.Source;
-            existing.CategoryId = article.CategoryId;
-            existing.Status = article.Status;
-            existing.ModifiedAt = DateTime.Now;
+            if (existingArticle == null)
+                throw new KeyNotFoundException("Không tìm thấy bài báo.");
 
-            await _repository.UpdateArticleAsync(existing);
+            existingArticle.Title = dto.Title ?? existingArticle.Title;
+            existingArticle.Headline = dto.Headline ?? existingArticle.Headline;
+            existingArticle.Content = dto.Content ?? existingArticle.Content;
+            existingArticle.Source = dto.Source ?? existingArticle.Source;
+            existingArticle.ImageURL = dto.ImageURL ?? existingArticle.ImageURL;
+            existingArticle.Status = dto.Status ?? existingArticle.Status;
+            existingArticle.CategoryId = dto.CategoryId != 0 ? dto.CategoryId : existingArticle.CategoryId;
+            existingArticle.ModifiedAt = DateTime.Now;
+
+            if (dto.TagIds != null)
+            {
+                var selectedTags = await _context.Tags
+                    .Where(t => dto.TagIds.Contains(t.TagId))
+                    .ToListAsync();
+
+                existingArticle.Tags.Clear();
+                foreach (var tag in selectedTags)
+                {
+                    existingArticle.Tags.Add(tag);
+                }
+            }
+
+            // Nếu có ảnh mới khác ảnh cũ
+            if (dto.ImageURL != null && dto.ImageURL != existingArticle.ImageURL)
+            {
+                var oldImagePath = Path.Combine("wwwroot", existingArticle.ImageURL.TrimStart('/'));
+
+                if (System.IO.File.Exists(oldImagePath))
+                {
+                    System.IO.File.Delete(oldImagePath);
+                }
+
+                existingArticle.ImageURL = dto.ImageURL;
+            }
+
+
+            await _context.SaveChangesAsync();
         }
-
-        
-
     }
 }

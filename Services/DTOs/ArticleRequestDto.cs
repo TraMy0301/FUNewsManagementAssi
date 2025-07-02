@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -27,5 +29,9 @@ namespace Services.DTOs
         public DateTime? CreatedAt { get; set; }
 
         public DateTime? ModifiedAt { get; set; }
+        public IFormFile? ImageFile { get; set; } // ảnh upload
+        public string? ImageURL { get; set; }      // link lưu DB (đường dẫn)
+
+        public List<int> TagIds { get; set; } = new();  
     }
 }

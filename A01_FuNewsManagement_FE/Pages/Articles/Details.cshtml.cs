@@ -1,63 +1,60 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Newtonsoft.Json;
+using Services.DTOs;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace A01_FuNewsManagement_FE.Pages.Articles
 {
     public class DetailsModel : PageModel
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public DetailsModel(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient();
+            _httpClientFactory = httpClientFactory;
         }
 
-        public CategoryResponseDto Category { get; set; }
-        public string ErrorMessage { get; set; }
+        public ArticleResponseDto Article { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string id)
+
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"https://localhost:7281/api/Categories/{id}");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var apiResponse = await response.Content.ReadAsStringAsync();
-                    var parsed = JsonConvert.DeserializeObject<ApiResponse<CategoryResponseDto>>(apiResponse);
-                    Category = parsed.Data;
-                    return Page();
-                }
-                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    ErrorMessage = "Không tìm thấy danh mục.";
-                    return Page();
-                }
+            // Giả sử bạn dùng Session để lưu access token
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+            Console.WriteLine(accessToken);
 
-                ErrorMessage = "Lỗi khi lấy thông tin danh mục.";
-                return Page();
-            }
-            catch (Exception ex)
+            // Giải mã JWT để lấy email (nếu không muốn backend trả email riêng)
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(accessToken);
+
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            ViewData["Role"] = role;
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync($"https://localhost:7281/api/Articles/{id}");
+
+            if (!response.IsSuccessStatusCode)
             {
-                ErrorMessage = "Lỗi kết nối: " + ex.Message;
-                return Page();
+                return NotFound();
             }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var json = JsonSerializer.Deserialize<ApiResponse<ArticleResponseDto>>(responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Article = json?.Result;
+
+            return Page();
         }
 
         public class ApiResponse<T>
         {
-            public int StatusCode { get; set; }
+            public T Result { get; set; }
+            public int Code { get; set; }
             public string Message { get; set; }
-            public T Data { get; set; }
-        }
-
-        public class CategoryResponseDto
-        {
-            public int CategoryId { get; set; }
-            public string CategoryName { get; set; }
-            public string Status { get; set; }
-            public DateTime CreatedAt { get; set; }
         }
     }
+
 }

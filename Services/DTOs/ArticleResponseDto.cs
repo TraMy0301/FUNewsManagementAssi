@@ -35,7 +35,9 @@ namespace Services.DTOs
 
         public CategoryResponseDto Category { get; set; }
 
-        public List<TagResponseDto> Tags { get; set; }
+        public List<TagResponseDto> Tags { get; set; } = new();
+        public string ImageURL { get; set; }
+        //public List<TagDto>? Tags { get; set; }
 
     }
 }

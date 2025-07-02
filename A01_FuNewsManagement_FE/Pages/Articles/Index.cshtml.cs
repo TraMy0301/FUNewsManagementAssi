@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using BusinessObjects.Entities;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Services.DTOs;
-using System.Text.Json.Serialization;
+using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text.Json;
-using BusinessObjects.Entities;
+using System.Text.Json.Serialization;
 
 namespace A01_FuNewsManagement_FE.Pages.Articles
 {
@@ -50,6 +54,8 @@ namespace A01_FuNewsManagement_FE.Pages.Articles
             try
             {
                 _logger.LogInformation("Bắt đầu lấy danh sách bài viết từ API");
+                
+
 
                 // Fetch categories for the dropdown
                 var categoryResponse = await _httpClient.GetFromJsonAsync<List<Category>>(

@@ -1,4 +1,4 @@
-﻿using BusinessObjects.Data;
+﻿using BusinessObjects;
 using BusinessObjects.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -8,9 +8,9 @@ namespace Repositories
 {
     public class ArticleRepository : IArticleRepository
     {
-        private readonly FuNewsManagementDbContext _context;
+        private readonly FuNewsDbContext _context;
 
-        public ArticleRepository(FuNewsManagementDbContext context)
+        public ArticleRepository(FuNewsDbContext context)
         {
             _context = context;
         }

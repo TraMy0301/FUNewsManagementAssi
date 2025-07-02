@@ -1,4 +1,4 @@
-﻿using BusinessObjects.Data;
+﻿using BusinessObjects;
 using BusinessObjects.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -8,9 +8,9 @@ namespace Repositories
 {
     public class TagRepository : ITagRepository
     {
-        private readonly FuNewsManagementDbContext _context;
+        private readonly FuNewsDbContext _context;
 
-        public TagRepository(FuNewsManagementDbContext context)
+        public TagRepository(FuNewsDbContext context)
         {
             _context = context;
         }

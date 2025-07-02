@@ -97,6 +97,7 @@ namespace A01_FuNewsManagement_FE.Pages.Articles
                 }
 
                 // Fetch articles with OData query
+                // Fetch articles with OData query
                 var response = await _httpClient.GetFromJsonAsync<List<ArticleResponseDto>>(
                     query,
                     new JsonSerializerOptions

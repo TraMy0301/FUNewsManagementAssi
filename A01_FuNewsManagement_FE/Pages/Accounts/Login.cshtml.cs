@@ -61,11 +61,11 @@ namespace A01_FuNewsManagement_FE.Pages.Accounts
                     {
                         HttpContext.Session.SetString("UserEmail", email);
                     }
-                    if ( role == "Admin")
+                    if ( role == "0")
                     {
                         return RedirectToPage("/Admin/Users/Index");
                     }
-                    else if (role == "Staff")
+                    else if (role == "1")
                     {
                         return RedirectToPage("/Articles/Index");
                     }

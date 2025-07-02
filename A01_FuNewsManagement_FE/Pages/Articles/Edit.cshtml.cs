@@ -11,42 +11,47 @@ namespace A01_FuNewsManagement_FE.Pages.Articles
     public class EditModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly HttpClient _httpClient;
         private readonly ILogger<CreateModel> _logger;
 
-        public EditModel(IHttpClientFactory httpClientFactory,HttpClient httpClient, ILogger<CreateModel> logger)
+        public EditModel(IHttpClientFactory httpClientFactory, ILogger<CreateModel> logger)
         {
             _httpClientFactory = httpClientFactory;
-            _httpClient = httpClient;
             _logger = logger;
         }
 
         [BindProperty]
-        public ArticleRequestDto Article { get; set; }
+        public ArticleRequestDto Article { get; set; } = new();
 
         [BindProperty]
-        public string ArticleId { get; set; }
+        public string ArticleId { get; set; } = string.Empty;
+
+        public List<Category> Categories { get; set; } = new();
+        public List<Tag> Tags { get; set; } = new(); // 👉 Danh sách Tag để hiển thị checkbox
+        [BindProperty]
+        public IFormFile? UploadImage { get; set; }
+
 
         public IEnumerable<SelectListItem> CategoryOptions { get; set; } = new List<SelectListItem>();
-        public List<Category> Categories { get; set; }
 
-
+        // 🟢 GET: Hiển thị form với dữ liệu bài viết cần sửa
         public async Task<IActionResult> OnGetAsync(string id)
         {
             var client = _httpClientFactory.CreateClient("ApiClient");
 
-            // Lấy dữ liệu bài báo
+            // 🧠 Lấy thông tin bài viết từ API
             var response = await client.GetAsync($"api/Articles/{id}");
             if (!response.IsSuccessStatusCode)
                 return NotFound();
 
             var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<ArticleResponseDto>>();
-            if (apiResponse == null || apiResponse.result == null)
+            if (apiResponse?.result == null)
                 return NotFound();
 
             var article = apiResponse.result;
 
             ArticleId = article.ArticleId;
+
+            // 🔁 Gán thông tin bài viết vào ArticleRequestDto để bind lên form
             Article = new ArticleRequestDto
             {
                 Title = article.Title,
@@ -54,51 +59,54 @@ namespace A01_FuNewsManagement_FE.Pages.Articles
                 Content = article.Content,
                 Source = article.Source,
                 Status = article.Status,
-                CategoryId = article.CategoryId ?? 0, 
+                CategoryId = article.CategoryId ?? 0,
                 CreatedAt = article.CreatedAt,
-                ModifiedAt = article.ModifiedAt
+                ModifiedAt = article.ModifiedAt,
+                ImageURL = article.ImageURL,
+                TagIds = article.Tags?.Select(t => t.TagId).ToList() ?? new List<int>() // ✅ Gán tag đã chọn
             };
 
-            _logger.LogInformation("Bắt đầu lấy danh sách danh mục cho form tạo bài viết");
-            var client1 = _httpClientFactory.CreateClient("ApiClient");
 
-            var categoryResponse = await client.GetFromJsonAsync<List<Category>>(
-                "api/Categories",
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            );
-
-            if (categoryResponse != null)
-            {
-                Categories = categoryResponse;
-
-                CategoryOptions = categoryResponse.Select(c => new SelectListItem
-                {
-                    Value = c.CategoryId.ToString(),   
-                    Text = c.CategoryName              
-                }).ToList();
-            }
-            else
-            {
-                Categories = new List<Category>();
-                CategoryOptions = new List<SelectListItem>();
-            }
-
+            // 🔁 Load Category & Tag để hiển thị lên UI
+            await LoadCategoriesAsync();
+            await LoadTagsAsync();
 
             return Page();
         }
 
+        // 🔁 POST: Gửi dữ liệu đã chỉnh sửa để cập nhật bài viết
         public async Task<IActionResult> OnPostAsync()
         {
-            string id = ArticleId;
+            var client = _httpClientFactory.CreateClient("ApiClient");
+
             if (!ModelState.IsValid)
             {
                 await LoadCategoriesAsync();
+                await LoadTagsAsync();
                 return Page();
             }
+            if (UploadImage != null && UploadImage.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(UploadImage.FileName)}";
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
 
-            var client = _httpClientFactory.CreateClient("ApiClient");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
-            var response = await client.PutAsJsonAsync($"api/Articles/{id}", Article);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await UploadImage.CopyToAsync(stream);
+                }
+
+                // ✅ Gán đường dẫn ảnh vào DTO gửi API
+                Article.ImageURL = $"/uploads/{fileName}";
+            }
+
+
+
+            var response = await client.PutAsJsonAsync($"api/Articles/{ArticleId}", Article);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("./Index");
@@ -118,16 +126,8 @@ namespace A01_FuNewsManagement_FE.Pages.Articles
                 ModelState.AddModelError(string.Empty, rawContent);
             }
 
-            // Load lại category nếu có lỗi
-            //var categoryResponse = await client.GetFromJsonAsync<ApiResponse<List<CategoryResponseDto>>>("api/Categories");
-            //if (categoryResponse?.result != null)
-            //{
-            //    Categories = categoryResponse.result.Select(c => new SelectListItem
-            //    {
-            //        Value = c.CategoryId.ToString(),
-            //        Text = c.CategoryName
-            //    }).ToList();
-            //}
+            await LoadCategoriesAsync();
+            await LoadTagsAsync();
 
             return Page();
         }
@@ -145,5 +145,12 @@ namespace A01_FuNewsManagement_FE.Pages.Articles
             }).ToList();
         }
 
+        private async Task LoadTagsAsync()
+        {
+            var client = _httpClientFactory.CreateClient("ApiClient");
+            var tagResponse = await client.GetFromJsonAsync<List<Tag>>("odata/Tags");
+
+            Tags = tagResponse ?? new List<Tag>();
+        }
     }
 }

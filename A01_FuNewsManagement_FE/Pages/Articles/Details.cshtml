@@ -1,28 +1,62 @@
-﻿@page "{id:int}"
-@model A01_FuNewsManagement_FE.Pages.Articles.DetailsModel
-@{
-    ViewData["Title"] = "Chi tiết danh mục";
-}
+﻿@page "{id}"
+@model DetailsModel
 
-<h2>Chi tiết danh mục</h2>
+<div class="article-detail">
+    <h1>@Model.Article.Title</h1>
 
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
-}
-else if (Model.Category != null)
-{
-    <div class="card mt-3">
-        <div class="card-body">
-            <h4 class="card-title">@Model.Category.CategoryName</h4>
-            <p><strong>ID:</strong> @Model.Category.CategoryId</p>
-            <p><strong>Trạng thái:</strong> @Model.Category.Status</p>
-            <p><strong>Ngày tạo:</strong> @Model.Category.CreatedAt.ToString("dd/MM/yyyy")</p>
-        </div>
+    <img src="@Model.Article.ImageURL" alt="Ảnh bài viết" style="max-width: 100%; height: auto; margin-bottom: 1rem;" />
+
+    <p class="headline"><em>@Model.Article.Headline</em></p>
+
+    <div class="meta">
+        <p><strong>Trạng thái:</strong> @Model.Article.Status</p>
+        <p><strong>Nguồn:</strong> @Model.Article.Source</p>
+        <p><strong>Ngày tạo:</strong> @Model.Article.CreatedAt</p>
     </div>
-}
-else
-{
-    <p>Đang tải dữ liệu...</p>
-}
 
+    <hr />
+
+    <div class="content">
+        <p>@Model.Article.Content</p>
+    </div>
+
+    @{
+        var role = ViewData["Role"]?.ToString();
+        string backUrl = role == "0"
+        ? Url.Page("/Admin/Users/Index")
+        : role == "1"
+        ? Url.Page("/Articles/Index")
+        : Url.Page("/Articles/IndexCus");
+    }
+
+    <a href="@backUrl" class="btn btn-secondary">⬅️ Quay về</a>
+</div>
+
+<style>
+    .article-detail {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .headline {
+        font-size: 1.2rem;
+        color: #444;
+        margin-bottom: 1rem;
+    }
+
+    .meta p {
+        margin: 0.3rem 0;
+        font-size: 0.95rem;
+        color: #666;
+    }
+
+    .content {
+        margin-top: 1.5rem;
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+</style>
