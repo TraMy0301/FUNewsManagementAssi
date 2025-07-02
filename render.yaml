@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: fu-news-management
+    runtime: dotnet
+    branch: main
+    buildCommand: dotnet build
+    startCommand: dotnet A01_FuNewsManagement_FE.dll
+    buildFilter:
+      paths:
+        - A01_FuNewsManagement_FE/**
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
